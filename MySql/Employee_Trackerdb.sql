@@ -23,3 +23,6 @@ last_name VARCHAR(30),
 role_id INT,
 manager_id INT
 );
+
+INSERT INTO department(role)
+VALUES ("Finance"), ("Legal"), ("Sales"), ("Engineering"),
