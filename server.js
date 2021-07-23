@@ -23,7 +23,7 @@ const connection = mysql.createConnection({
         ],
       })
       .then((answer) => {
-      switch (answer.action) {
+      switch (answer.menu) {
       case 'Adding departments, roles, or employees':
           addData();
           break;
@@ -71,9 +71,21 @@ const connection = mysql.createConnection({
           }
         })   
     };
-
-  connection.connect((err) => {
-    if (err) throw err;
-    console.log(`connected as id ${connection.threadId}`);
-    afterConnection();
-  });
+    const addDepartment = () => {
+      inquirer.prompt([{
+            name: "department",
+            type: "input",
+            message: "What is the department?",
+          },
+        ])
+        .then((answer) => {
+          connection.query(
+            "INSERT INTO department (naming) VALUES (?)",
+            [answer.department],
+            function (err, res) {
+              if (err) throw err;
+              start();
+            }
+          );
+        });
+    };
