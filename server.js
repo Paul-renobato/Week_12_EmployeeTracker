@@ -183,3 +183,29 @@ const connection = mysql.createConnection({
           }
         );
       };
+      function RolesUpdate() {
+        inquirer.prompt([{
+        name: "id",
+        type: "input",
+        message: "Enter id",
+        },
+        {
+        name: "roleid",
+        type: "input",
+        message: "Enter role id",
+        },
+        {
+        name: "name",
+        type: "input",
+        message: "Enter Name",
+        }
+          ])
+        .then((answer) => {
+            const query =
+              `UPDATE employee SET first_name = '${answer.name}' WHERE id = ${employeeUpdateId}`;
+              connection.query(query, (err, res) =>{
+                init();
+              }
+            );
+          });
+      };
