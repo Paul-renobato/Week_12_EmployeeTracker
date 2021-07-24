@@ -1,16 +1,20 @@
-const mysql = require("mysql");
-const inquirer = require("inquirer");
+const mysql = require('mysql');
+const inquirer = require('inquirer');
 const cTable = require('console.table');
 
 const connection = mysql.createConnection({
-    host: "localhost",
+    host: 'localhost',
     port: 3306,
-    user: "root",
-    password: "Supermega2015!",
-    database: "Employee_Trackerdb",
+    user: 'root',
+    password: 'Supermega2015!',
+    database: 'Employee_Trackerdb',
   });
 
-  const start = () => {
+  connection.connect(
+    init()
+  );
+
+  function init() {
     inquirer.prompt({
         name: 'menu',
         type: 'list',
@@ -24,11 +28,11 @@ const connection = mysql.createConnection({
       })
       .then((answer) => {
       switch (answer.menu) {
-      case 'Adding departments, roles, or employees':
+      case 'Add departments, roles, or employees':
           addData();
           break;
             
-      case 'Viewing departments, roles, or employees':
+      case 'View departments, roles, or employees':
           viewData();
           break;
   
@@ -42,9 +46,9 @@ const connection = mysql.createConnection({
         }
       })
     };
-    const addData = () => {
+    function addData() {
       inquirer.prompt({
-          name: 'menu',
+          name: 'addmenu',
           type: 'list',
           message: 'What do you want to add?',
           choices: [
@@ -55,14 +59,14 @@ const connection = mysql.createConnection({
           ],
         })
         .then((answer) => {
-      switch (answer.action) {
-      case 'Department':
+      switch (answer.addmenu) {
+      case 'Departments':
               addDepartment();
           break;
-      case 'Role':
+      case 'Roles':
               AddRole();
           break;
-      case 'Employee':
+      case 'Employees':
               AddEmployee();
           break;
       case 'Exit':
@@ -71,21 +75,111 @@ const connection = mysql.createConnection({
           }
         })   
     };
-    const addDepartment = () => {
-      inquirer.prompt([{
+    function addDepartment() {
+      inquirer.prompt({
             name: "department",
             type: "input",
-            message: "What is the department?",
+            message: "What is the name of the department?"
+          }
+        )
+        .then((answer) => {
+          const query =
+            `INSERT INTO department (naming) VALUES ('${answer.department}')`
+            connection.query(query, (err, res) => {
+              init();
+            })
+        });
+    };
+    function AddRole() {
+      inquirer.prompt([{
+      name:'title',
+      type:'input',
+      message:'What is the role title:',
+      },{
+      name:'salary',
+      type:'input',
+      message:'What is the salary:',
+      },{
+      name:'department_id',
+      type:'list',
+      message:'What is the ID to the department:',
+      },])
+        .then((answer) => {
+          const query =
+            `INSERT INTO roleDept (title, salary, department_id)  VALUES (${answer.title}, ${answer.salary}, ${answer.department_id})`;
+            connection.query(query, (err, res) => {
+              init();
+            })
+        });
+    };
+    function AddEmployee() {
+      inquirer.prompt([{
+      name: "first_name",
+      type: "input",
+      message: "What is the first name?",
+      },{
+      name: "last_name",
+      type: "input",
+      message: "What is the last name?",
+      },{
+      name: "role_id",
+      type: "input",
+      message: "What is the id?",
           },
         ])
         .then((answer) => {
-          connection.query(
-            "INSERT INTO department (naming) VALUES (?)",
-            [answer.department],
-            function (err, res) {
-              if (err) throw err;
-              start();
-            }
-          );
+          const query =
+            `INSERT INTO employee (first_name, last_name, role_id) VALUES (${answer.first_name}, ${answer.last_name}, ${answer.role_id})`;
+            connection.query(query, (err, res) => {
+              init();
+            })
         });
-    };
+      };
+      function viewData() {
+        inquirer.prompt({
+            name: 'viewmenu',
+            type: 'list',
+            message: 'What do you want to view?',
+            choices: [
+              'Departments',
+              'Roles',
+              'Employees',
+              'Exit',
+            ],
+          })
+          .then((answer) => {
+        switch (answer.viewmenu) {
+        case 'Departments':
+                viewDepartment();
+            break;
+        case 'Roles':
+                viewRole();
+            break;
+        case 'Employees':
+                viewEmployee();
+            break;
+        case 'Exit':
+                connection.end();
+            break;
+            }
+          })   
+      };
+      function viewDepartment() {
+        connection.query("SELECT * FROM department", function (err, res) {
+          console.table(res);
+          init();
+        });
+      };
+      function viewRole() {
+        connection.query("SELECT * FROM roleDept", function (err, res) {
+          console.table(res);
+          init();
+        });
+      };
+      function viewEmployee() {
+        connection.query("SELECT * FROM employee", function (err, res) {
+            console.table(res);
+            init();
+          }
+        );
+      };
